@@ -6,7 +6,8 @@
       <HomeSwiper :banners="banners"></HomeSwiper>
       <recommendView :recommends="recommend"></recommendView>
       <FeatureView class="feature"></FeatureView>
-      <TabControl :titles="titles" @itemClick="tabClick"></TabControl>
+      <TabControl :titles="titles" @itemClick="tabClick" class="tabcontrol"></TabControl>
+      <!--<GoodsList :goodsList="showGoods"></GoodsList>-->
       <ul>
         <li></li>
         <li></li>
@@ -58,8 +59,13 @@
 
   import TabControl from 'components/content/tabControl/TabControl'
   import NavBar from 'components/common/navbar/NavBar'
+  // import Scroll from 'components/common/scroll/Scroll'
 
-  import {getHomeMultidata} from "network/home";
+
+  import {
+    getHomeMultidata,
+    getHomeData
+  } from "network/home";
 
   export default {
       name: "Home",
@@ -69,6 +75,7 @@
         RecommendView,
         FeatureView,
         TabControl
+        // Scroll
         // GoodsList
       },
       data() {
@@ -84,19 +91,51 @@
             "pop": {page: 0, list: []},
             "news": {page: 0, list: []},
             "sell": {page: 0, list: []},
-          }
+          },
+          currentType: 'pop'
         }
       },
+    computed: {
+        // showGoods() {
+        //   return this.goods[this.currentType].list
+        // }
+    },
       created() {
         //1.请求多个数据
-        getHomeMultidata().then(res => {
-          console.log(res.data)
-          this.banners = res.data.banner.list
-          this.recommend = res.data.recommend.list
-        })
+        this.getHomeMultidata()
+        this.getHomeData(this.currentType)
       },
       methods: {
+        getHomeMultidata() {
+          getHomeMultidata().then(res => {
+            this.banners = res.data.banner.list
+            this.recommends = res.data.recommend.list
+          })
+        },
+        getHomeData(type) {
+          const page = this.goods[type].page + 1
+          getHomeData(type,page).then(res => {
+            // if (page === 1){
+            //   this.goods[type].list === []
+            // }
+            // this.goods[type].list.push(...res.data.list)es6中的语法（合并两个数组）
+            // this.goods[type].list = this.goods[type].list.concat(res.data.list)(常规合并两个数组)
+            // this.goods[type].page += 1
+            console.log(res)
+          })
+        },
         tabClick (index) {
+          switch (index) {
+            case 0 :
+              this.currentType = 'pop';
+              break;
+            case 1:
+              this.currentType = 'news';
+              break;
+            case 2:
+              this.currentType = 'sell';
+              break;
+          }
           console.log(index)
         }
       }
